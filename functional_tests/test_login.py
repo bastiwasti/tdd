@@ -1,7 +1,13 @@
 from .base import FunctionalTest
+from selenium.webdriver.support.ui import WebDriverWait
 import time
 
 class LoginTest(FunctionalTest):
+
+    def wait_for_element_with_id(self, element_id):
+        WebDriverWait(self.browser, timeout=30).until(
+            lambda b: b.find_element_by_id(element_id)
+        )
 
     def test_login_with_persona(self):
         # Edith goes to the awesome superlists site
