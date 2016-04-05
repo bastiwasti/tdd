@@ -5,14 +5,6 @@ import time
 TEST_EMAIL = 'edith@mockmyid.com'
 
 class LoginTest(FunctionalTest):
-
-    def wait_for_element_with_id(self, element_id):
-        WebDriverWait(self.browser, timeout=30).until(
-            lambda b: b.find_element_by_id(element_id),
-            'Could not find element with id {}. Page text was:\n{}'.format(
-                element_id, self.browser.find_element_by_tag_name('body').text
-            )
-        )
         
     def switch_to_new_window(self, text_in_title):
         retries = 60
