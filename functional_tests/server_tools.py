@@ -2,20 +2,21 @@ from os import path
 import subprocess
 THIS_FOLDER = path.dirname(path.abspath(__file__))
 
-def create_session_on_server(host,email):
+def reset_database(host):
+    subprocess.check_call(
+        ['fab', 'reset_database', '--host={}'.format(host)],
+        cwd=THIS_FOLDER
+    )
+
+def create_session_on_server(host, email):
     return subprocess.check_output(
         [
             'fab',
-            'create_session_on_server:email={}'.format(email),
+            '-i', 'c:/users/skap/desktop/linux/ssh.pem',
+            'create_session_on_server:email={}'.format(email), #12
             '--host={}'.format(host),
-            '--i c:/users/skap/desktop/linux/ssh.pem',
-            '--hide=everything,status',
+            '--hide=everything,status', #3
         ],
         cwd=THIS_FOLDER
-    ).decode().strip()
+    ).decode().strip() #4
     
-def reset_database(host):
-    subprocess.check_call(
-        ['fab','reset_database', '--host={}'.format(host)],
-        cwd=THIS_FOLDER
-    )
