@@ -4,8 +4,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 import sys
 from .server_tools import reset_database
 
+import time
+from selenium.common.exceptions import WebDriverException
+
 import os
 from datetime import datetime
+
+DEFAULT_WAIT = 5
+SCREEN_DUMP_LOCATION = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'screendumps'
+)
 
 SCREEN_DUMP_LOCATION = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'screendumps'
@@ -32,11 +40,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def setUp(self):
-        if self.against_staging:
-            reset_database(self.server_host)
-
         self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(3)
+        self.browser.implicitly_wait(DEFAULT_WAIT)
 
     def tearDown(self):
         if self._test_has_failed():
@@ -44,7 +49,7 @@ class FunctionalTest(StaticLiveServerTestCase):
                 os.makedirs(SCREEN_DUMP_LOCATION)
             for ix, handle in enumerate(self.browser.window_handles):
                 self._windowid=ix
-                self.browser.server_to_window(handle)
+                self.browser.switch_to_window(handle)
                 self.take_screenshot()
                 self.dump_html()
         self.browser.quit()
@@ -66,6 +71,16 @@ class FunctionalTest(StaticLiveServerTestCase):
             windowid=self._windowid,
             timestamp=timestamp
         )
+        
+    def wait_for(self, function_with_assertion, timeout=DEFAULT_WAIT):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                return function_with_assertion()
+            except (AssertionError, WebDriverException):
+                time.sleep(0.1)
+        # one more try, which will raise any errors if they are outstanding
+        return function_with_assertion()
         
     def take_screenshot(self):
         filename = self._get_filename() + '.png'
